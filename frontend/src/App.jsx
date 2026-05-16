@@ -9,7 +9,8 @@ function App() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [stats, setStats] = useState('');
+  const [stats, setStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(false);
   const [shortCode, setShortCode] = useState('');
 
   const isValidUrl = (str) => {
@@ -76,6 +77,19 @@ function App() {
    const data = await res.json();
    setStats(data);
  };
+ const fetchStats = async () => {
+   setLoadingStats(true);
+   try {
+     const res = await fetch(`${API_URL}/stats/${shortCode}`);
+     const data = await res.json();
+     setStats(data);
+   } catch (err) {
+     setError("Failed to load stats");
+   } finally {
+     setLoadingStats(false);
+   }
+ };
+
 
   return (
     <div className="app">
@@ -137,9 +151,10 @@ function App() {
             <button
               type="button"
               className="copy-button"
-              onClick={handleStats}
+              onClick={fetchStats}
+              disabled={loadingStats}
             >
-              View Stats
+              {stats ? "Refresh Stats" : "View Stats"}
             </button>
           </div>
         </div>
@@ -147,8 +162,8 @@ function App() {
 
     {stats && (
       <div className="result-card">
-        <div>Total clicks: {stats["Total clicks: "]}</div>
-        <div>Unique visitors: {stats["Unique visitors: "]}</div>
+        <p>Total Clicks: {stats["Total clicks: "]}</p>
+        <p>Unique Visitors: {stats["Unique visitors: "]}</p>
       </div>
     )}
     </div>
