@@ -9,6 +9,8 @@ function App() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [stats, setStats] = useState('');
+  const [shortCode, setShortCode] = useState('');
 
   const isValidUrl = (str) => {
     try {
@@ -51,6 +53,7 @@ function App() {
 
       const data = await response.text();
       setShortUrl(data);
+      setShortCode(data.split('/').pop());
     } catch (err) {
       setError(err.message || 'Something went wrong');
     } finally {
@@ -67,6 +70,12 @@ function App() {
       setError('Failed to copy to clipboard');
     }
   };
+
+ const handleStats = async () => {
+  const res = await fetch(`${API_URL}/stats/${shortCode}`);
+   const data = await res.json();
+   setStats(data);
+ };
 
   return (
     <div className="app">
@@ -125,9 +134,23 @@ function App() {
             >
               {copied ? 'Copied!' : 'Copy'}
             </button>
+            <button
+              type="button"
+              className="copy-button"
+              onClick={handleStats}
+            >
+              View Stats
+            </button>
           </div>
         </div>
       )}
+
+    {stats && (
+      <div className="result-card">
+        <div>Total clicks: {stats["Total clicks: "]}</div>
+        <div>Unique visitors: {stats["Unique visitors: "]}</div>
+      </div>
+    )}
     </div>
   );
 }
